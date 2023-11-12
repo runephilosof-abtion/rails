@@ -23,7 +23,7 @@ module ActiveRecord
         reflection = association.reflection
         scope = klass.unscoped
         owner = association.owner
-        chain = get_chain(reflection, association, scope.alias_tracker)
+        chain = get_chain(reflection, association, scope.alias_strategy)
 
         scope.extending! reflection.extensions
         scope = add_constraints(scope, owner, chain)
@@ -109,12 +109,12 @@ module ActiveRecord
           def all_includes; nil; end
         end
 
-        def get_chain(reflection, association, tracker)
-          name = reflection.name
+        def get_chain(reflection, association, alias_strategy)
+          parent_table_name = reflection.name
           chain = [Reflection::RuntimeReflection.new(reflection, association)]
           reflection.chain.drop(1).each do |refl|
-            aliased_table = tracker.aliased_table_for(refl.klass.arel_table) do
-              refl.alias_candidate(name)
+            aliased_table = alias_strategy.aliased_table_for(refl, reflection) do
+              refl.alias_candidate(parent_table_name)
             end
             chain << ReflectionProxy.new(refl, aliased_table)
           end

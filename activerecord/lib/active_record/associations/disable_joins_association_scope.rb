@@ -7,7 +7,7 @@ module ActiveRecord
         source_reflection = association.reflection
         owner = association.owner
         unscoped = association.klass.unscoped
-        reverse_chain = get_chain(source_reflection, association, unscoped.alias_tracker).reverse
+        reverse_chain = get_chain(source_reflection, association, unscoped.alias_strategy).reverse
 
         last_reflection, last_ordered, last_join_ids = last_scope_chain(reverse_chain, owner)
 

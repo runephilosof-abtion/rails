@@ -82,8 +82,8 @@ module ActiveRecord
         join_root.drop(1).map!(&:reflection)
       end
 
-      def join_constraints(joins_to_add, alias_tracker, references)
-        @alias_tracker = alias_tracker
+      def join_constraints(joins_to_add, alias_strategy, references)
+        @alias_strategy = alias_strategy
         @joined_tables = {}
         @references = {}
 
@@ -163,7 +163,7 @@ module ActiveRecord
         attr_reader :join_root, :join_type
 
       private
-        attr_reader :alias_tracker, :join_root_alias
+        attr_reader :alias_strategy, :join_root_alias
 
         def aliases
           @aliases ||= Aliases.new join_root.each_with_index.map { |join_part, i|
@@ -190,7 +190,7 @@ module ActiveRecord
         def make_constraints(parent, child, join_type)
           foreign_table = parent.table
           foreign_klass = parent.base_klass
-          child.join_constraints(foreign_table, foreign_klass, join_type, alias_tracker) do |reflection|
+          child.join_constraints(foreign_table, foreign_klass, join_type, alias_strategy) do |reflection|
             table, terminated = @joined_tables[reflection]
             root = reflection == child.reflection
 
@@ -201,7 +201,7 @@ module ActiveRecord
 
             table_name = @references[reflection.name.to_sym]&.to_s
 
-            table = alias_tracker.aliased_table_for(reflection.klass.arel_table, table_name) do
+            table = alias_strategy.aliased_table_for(reflection, parent, table_name) do
               name = reflection.alias_candidate(parent.table_name)
               root ? name : "#{name}_join"
             end

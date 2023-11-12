@@ -1490,8 +1490,8 @@ module ActiveRecord
     end
 
     # Returns the Arel object associated with the relation.
-    def arel(aliases = nil) # :nodoc:
-      @arel ||= build_arel(aliases)
+    def arel(aliases_tracker = nil) # :nodoc:
+      @arel ||= build_arel(aliases_tracker)
     end
 
     def construct_join_dependency(associations, join_type) # :nodoc:
@@ -1579,10 +1579,10 @@ module ActiveRecord
         raise ImmutableRelation if defined?(@arel) && @arel
       end
 
-      def build_arel(aliases = nil)
+      def build_arel(aliases_tracker = nil)
         arel = Arel::SelectManager.new(table)
 
-        build_joins(arel.join_sources, aliases)
+        build_joins(arel.join_sources, aliases_tracker)
 
         arel.where(where_clause.ast) unless where_clause.empty?
         arel.having(having_clause.ast) unless having_clause.empty?
@@ -1710,7 +1710,7 @@ module ActiveRecord
         return buckets, Arel::Nodes::InnerJoin
       end
 
-      def build_joins(join_sources, aliases = nil)
+      def build_joins(join_sources, aliases_tracker = nil)
         return join_sources if joins_values.empty? && left_outer_joins_values.empty?
 
         buckets, join_type = build_join_buckets
@@ -1723,9 +1723,9 @@ module ActiveRecord
         join_sources.concat(leading_joins) unless leading_joins.empty?
 
         unless named_joins.empty? && stashed_joins.empty?
-          alias_tracker = alias_tracker(leading_joins + join_nodes, aliases)
+          alias_strategy = alias_strategy(leading_joins + join_nodes, aliases_tracker)
           join_dependency = construct_join_dependency(named_joins, join_type)
-          join_sources.concat(join_dependency.join_constraints(stashed_joins, alias_tracker, references_values))
+          join_sources.concat(join_dependency.join_constraints(stashed_joins, alias_strategy, references_values))
         end
 
         join_sources.concat(join_nodes) unless join_nodes.empty?

@@ -21,7 +21,7 @@ module ActiveRecord
           super && reflection == other.reflection
         end
 
-        def join_constraints(foreign_table, foreign_klass, join_type, alias_tracker)
+        def join_constraints(foreign_table, foreign_klass, join_type, alias_strategy)
           joins = []
           chain = []
 
@@ -52,7 +52,7 @@ module ActiveRecord
               end
             end
 
-            arel = scope.arel(alias_tracker.aliases)
+            arel = scope.arel(alias_strategy.aliases_tracker)
             nodes = arel.constraints.first
 
             if nodes.is_a?(Arel::Nodes::And)

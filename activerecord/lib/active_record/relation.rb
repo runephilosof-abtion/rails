@@ -845,8 +845,8 @@ module ActiveRecord
       limit_value || offset_value
     end
 
-    def alias_tracker(joins = [], aliases = nil) # :nodoc:
-      ActiveRecord::Associations::AliasTracker.create(connection, table.name, joins, aliases)
+    def alias_strategy(joins = [], aliases_tracker = nil) # :nodoc:
+      ActiveRecord::Associations::AliasStrategy.create(connection, table.name, joins, aliases_tracker)
     end
 
     class StrictLoadingScope # :nodoc:

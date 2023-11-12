@@ -300,7 +300,7 @@ module ActiveRecord
       autoload :JoinDependency
       autoload :AssociationScope
       autoload :DisableJoinsAssociationScope
-      autoload :AliasTracker
+      autoload :AliasStrategy
     end
 
     def self.eager_load!
