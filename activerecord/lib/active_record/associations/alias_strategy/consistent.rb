@@ -12,6 +12,7 @@ module ActiveRecord
           alias_name = reflection.name.to_s
           alias_name = "#{parent_reflection.name}_#{alias_name}" if aliases_tracker[alias_name] > 0
           count = aliases_tracker[alias_name] += 1
+          arel_table = arel_table.alias(truncated_alias(alias_name, "")) if count == 1
           arel_table = arel_table.alias(truncated_alias(alias_name, "_#{count}")) if count > 1
           arel_table
         end
